@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
 import 'package:expense_tracker_app/widgets/expenses_dashboard.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Color Scheme for Light Theme
 var kLightColorScheme = ColorScheme.fromSeed(
@@ -15,7 +16,7 @@ var kDarkColorScheme = ColorScheme.fromSeed(
 );
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       // Dark Theme
       darkTheme: ThemeData.dark().copyWith(
         // useMaterial3: true,

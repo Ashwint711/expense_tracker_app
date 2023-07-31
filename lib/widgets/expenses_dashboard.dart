@@ -1,81 +1,79 @@
+import 'package:expense_tracker_app/models/expense_model.dart';
+import 'package:expense_tracker_app/providers/expense_provider.dart';
 import 'package:flutter/material.dart';
 
-import 'package:expense_tracker_app/models/expense_model.dart';
 import 'package:expense_tracker_app/widgets/add_new_expense.dart';
 import 'package:expense_tracker_app/widgets/expense_list/expense_list.dart';
 import 'package:expense_tracker_app/widgets/chart/chart.dart';
 
-class Expenses extends StatefulWidget {
-  const Expenses({super.key});
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+class Expenses extends ConsumerStatefulWidget {
+  const Expenses({super.key});
   @override
-  State<Expenses> createState() => _ExpensesState();
+  ConsumerState<Expenses> createState() => _ExpensesState();
 }
 
-class _ExpensesState extends State<Expenses> {
-  void _addExpenseOverlay() {
-    showModalBottomSheet(
-      isScrollControlled: true,
-      useSafeArea: true,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      context: context,
-      builder: (ctx) => AddNewExpense(populateExpenseList: _addNewExpense),
-    );
+class _ExpensesState extends ConsumerState<Expenses> {
+  var _error = '';
+  @override
+  void initState() {
+    loadExpenses();
+    super.initState();
   }
 
-  void _addNewExpense(expenseObject) {
-    setState(() {
-      _expenses.add(expenseObject);
-    });
+  void loadExpenses() async {
+    // Calling a function which is loading Data from the Database.
+    final response = await ref.read(expenseProvider.notifier).loadExpenses();
+    if (response != null) {
+      setState(() {
+        _error = response;
+      });
+    } else {}
   }
 
-  void _removeExpense(expenseObject) {
-    final index = _expenses.indexOf(expenseObject);
-    setState(() {
-      _expenses.remove(expenseObject);
-    });
-    /*------------------------------*/
-    //       THIS ALSO WORKS
-    // _expenses.remove(expenseObject);
+  void removeExpense(ExpenseModel expense) async {
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Expense removed!'),
-        action: SnackBarAction(
-          label: 'Undo',
-          onPressed: () {
-            setState(() {
-              _expenses.insert(index, expenseObject);
-            });
-          },
-        ),
+        content: const Text('Expense Removed'),
+        action: SnackBarAction(label: 'Undo', onPressed: () {}),
       ),
     );
+    final isRemoved =
+        await ref.read(expenseProvider.notifier).removeExpense(expense);
+    if (!isRemoved) {
+      if (!context.mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unable to remove expense!'),
+        ),
+      );
+      setState(() {});
+    }
   }
-
-  final List<ExpenseModel> _expenses = [
-    ExpenseModel(
-      title: "Flutter Course",
-      amount: 499,
-      date: DateTime.now(),
-      expenseCategory: ExpenseCategory.work,
-    ),
-    ExpenseModel(
-      title: "Cinema",
-      amount: 220,
-      date: DateTime.now(),
-      expenseCategory: ExpenseCategory.leisure,
-    ),
-  ];
 
   @override
   Widget build(BuildContext context) {
+    final expenses = ref.watch(expenseProvider);
     final width = MediaQuery.of(context).size.width;
+
     Widget mainContent = const Center(
-      child: Text('No expense found, Start adding some.'),
+      child: CircularProgressIndicator(),
     );
-    if (_expenses.isNotEmpty) {
-      mainContent = ExpenseList(expenses: _expenses, onRemoved: _removeExpense);
+
+    // If load expense fails
+    if (_error.length >= 2) {
+      mainContent = Center(
+        child: Text(_error),
+      );
+    }
+    if (expenses.isNotEmpty) {
+      mainContent = ExpenseList(
+        onRemoved: removeExpense,
+      );
     }
 
     return Scaffold(
@@ -87,7 +85,7 @@ class _ExpensesState extends State<Expenses> {
           IconButton(
             onPressed: _addExpenseOverlay, //Add new expense modal
             icon: const Icon(
-              Icons.add, // +
+              Icons.add,
             ),
           ),
         ],
@@ -95,27 +93,27 @@ class _ExpensesState extends State<Expenses> {
       body: width < 600
           ? Column(
               children: [
-                // Container(
-                //   height: 200,
-                //   width: double.infinity,
-                //   color: Colors.blue,
-                //   padding: const EdgeInsets.only(top: 100),
-                //   child: const Text(
-                //     "Chart",
-                //     textAlign: TextAlign.center,
-                //   ),
-                // ),
-                Chart(expenses: _expenses),
+                Chart(expenses: expenses),
                 Expanded(child: mainContent),
               ],
             )
           : Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: Chart(expenses: _expenses)),
+                Expanded(child: Chart(expenses: expenses)),
                 Expanded(child: mainContent),
               ],
             ),
+    );
+  }
+
+  void _addExpenseOverlay() {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      useSafeArea: true,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      context: context,
+      builder: (ctx) => const AddNewExpense(),
     );
   }
 }

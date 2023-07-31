@@ -1,11 +1,11 @@
-import 'package:uuid/uuid.dart';
+// import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
 
 final dateFormatter = DateFormat.yMd();
 
-const uuid = Uuid();
+// const uuid = Uuid();
 
 // Enum
 enum ExpenseCategory { food, travel, leisure, work }
@@ -23,7 +23,9 @@ class ExpenseModel {
     required this.amount,
     required this.date,
     required this.expenseCategory,
-  }) : id = uuid.v4(); //Initializer
+    required this.id,
+  });
+  // : id = uuid.v4(); //Initializer
   final String id;
   final String title;
   final double amount;
