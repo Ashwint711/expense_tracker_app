@@ -7,21 +7,7 @@ import '../models/expense_model.dart';
 import 'package:http/http.dart' as http;
 
 class ExpenseNotifier extends StateNotifier<List<ExpenseModel>> {
-  ExpenseNotifier()
-      : super([
-          // ExpenseModel(
-          //   title: "Flutter Course",
-          //   amount: 499,
-          //   date: DateTime.now(),
-          //   expenseCategory: ExpenseCategory.work,
-          // ),
-          // ExpenseModel(
-          //   title: "Cinema",
-          //   amount: 220,
-          //   date: DateTime.now(),
-          //   expenseCategory: ExpenseCategory.leisure,
-          // ),
-        ]);
+  ExpenseNotifier() : super([]);
   //Loading Expenses from the Firebase Realtime Database
   Future<String?> loadExpenses() async {
     final url = Uri.https('expense-tracker-80f99-default-rtdb.firebaseio.com',
@@ -32,7 +18,7 @@ class ExpenseNotifier extends StateNotifier<List<ExpenseModel>> {
     }
     if (response.body != 'null') {
       // print('Response.body is not null');
-      print(response.body);
+      // print(response.body);
       final Map<String, dynamic> loadedData = json.decode(response.body);
       List<ExpenseModel> loadedExpenses = [];
 
@@ -60,7 +46,36 @@ class ExpenseNotifier extends StateNotifier<List<ExpenseModel>> {
     return null;
   }
 
-  void addExpense(ExpenseModel expense) {
+  void addExpense(
+      {required String title,
+      required double amount,
+      required DateTime date,
+      required ExpenseCategory category}) async {
+    // Posting expense to the Database
+    final url = Uri.https('expense-tracker-80f99-default-rtdb.firebaseio.com',
+        'expense-list.json');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'title': title,
+        'amount': amount,
+        'date': date.toString(),
+        'expenseCategory': category.name,
+      }),
+    );
+    // Fetching the id of the expense Item
+    final itemId = json.decode(response.body);
+
+    // Creating Expense Object using passed data
+    ExpenseModel expense = ExpenseModel(
+        title: title,
+        amount: amount,
+        date: date,
+        expenseCategory: category,
+        id: itemId['name']);
+
+    // Converting Json Id data to Map
     state = [...state, expense];
   }
 
@@ -85,6 +100,21 @@ class ExpenseNotifier extends StateNotifier<List<ExpenseModel>> {
     List<ExpenseModel> expenses = List.of(state);
     expenses.insert(index, expense);
     state = expenses;
+    // Posting expense to the Database
+    final url = Uri.https('expense-tracker-80f99-default-rtdb.firebaseio.com',
+        'expense-list.json');
+    http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'title': expense.title,
+        'amount': expense.amount,
+        'date': expense.date.toString(),
+        'expenseCategory': expense.expenseCategory.name,
+      }),
+    );
+    // Fetching the id of the expense Item
+    // final itemId = json.decode(response.body);
   }
 }
 

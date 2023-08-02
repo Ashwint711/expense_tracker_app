@@ -1,11 +1,8 @@
-// import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
 
 final dateFormatter = DateFormat.yMd();
-
-// const uuid = Uuid();
 
 // Enum
 enum ExpenseCategory { food, travel, leisure, work }
