@@ -41,39 +41,3 @@ class ExpenseItem extends StatelessWidget {
     );
   }
 }
-
-/*
- Row(children: [
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-            margin: const EdgeInsets.only(right: 20),
-            decoration: BoxDecoration(
-              color: Colors.purple,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              "\$ ${expense.amount.toStringAsFixed(2)}",
-              //.toStringAsFixed(2) : 12.2333 => 12.23
-              style: const TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500),
-            ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  expense.title,
-                  style: const TextStyle(fontSize: 20, color: Colors.black),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  DateFormat.yMMMEd().format(expense.date),
-                  style: const TextStyle(fontSize: 14, color: Colors.black),
-                ),
-              ],
-            ),
-          ),
-        ]), */

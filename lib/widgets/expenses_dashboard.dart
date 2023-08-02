@@ -37,7 +37,11 @@ class _ExpensesState extends ConsumerState<Expenses> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Expense Removed'),
-        action: SnackBarAction(label: 'Undo', onPressed: () {}),
+        action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () {
+              ref.read(expenseProvider.notifier).insertExpense(expense);
+            }),
       ),
     );
     final isRemoved =
